@@ -1,0 +1,10 @@
+.env
+service_key.json
+node_modules
+.vercel
+
+
+# service_key.json
+# node_modules
+# .env
+# .vercel
