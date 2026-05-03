@@ -54,6 +54,7 @@ async function run() {
     await client.connect();
     const db = client.db("model_db");
     const modelCollection = db.collection("models");
+    const downloadCollection = db.collection("downloads");
 
     // get method
     // find
@@ -87,6 +88,18 @@ async function run() {
         .find({
           created_by: email,
         })
+        .toArray();
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
+    // get all data form mongodb data
+    app.get("/my-downloads", verifyToken, async (req, res) => {
+      const email = req.query.email;
+      const result = await downloadCollection
+        .find({ downloaded_by: email })
         .toArray();
       res.send({
         success: true,
@@ -139,6 +152,23 @@ async function run() {
       const result = await modelCollection.deleteOne(filter);
       res.send({
         success: true,
+      });
+    });
+
+    app.post("/downloads", async (req, res) => {
+      const data = req.body;
+      const result = await downloadCollection.insertOne(data);
+      const fiilter = { _id: new ObjectId(data._id) };
+      const update = {
+        $inc: {
+          downloaded: 1,
+        },
+      };
+      const dowloadCounted = await modelCollection.updateOne(fiilter, update);
+      res.send({
+        success: true,
+        result,
+        dowloadCounted,
       });
     });
 
